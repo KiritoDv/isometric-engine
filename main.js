@@ -14,6 +14,7 @@ function preload() {
 	textures["Grass"] = loadImage('assets/Grass.png');
 	textures["Grass3"] = loadImage('assets/Grass3.png');
 	textures["Stone"] = loadImage('assets/Stone.png');
+	textures["Wool"] = loadImage('assets/Wool_Base.png');
 	textures["Dirt"] = loadImage('assets/Dirt.png');
 	textures["G2M"] = loadImage('assets/G2M.png');
 	textures["SmallStone"] = loadImage('assets/SmallStone.png');		
@@ -28,13 +29,17 @@ function setup() {
 	canvasElt.style.width = '100%', canvasElt.style.height = '100%';
 	cameraLocation = createVector(0, 0, (height/2.0) / tan(PI*30.0 / 180.0));	
 	frameRate(60);
-	map = new Tilemap(150, 150, 150);
+	map = new Tilemap(70, 70, 70);
 
 	picker = new IsometricPicker({x: 32, y: 32});	
 
-	for (var i = 0; i < 100; i++) {
-		for (var k = 0; k < 100; k++) {
-			map.setTile(i, k, 0, { texture: textures["Grass"], width: 32, height: 32 });
+	for (var i = 0; i < 70; i++) {
+		for (var k = 0; k < 70; k++) {
+			map.setTile(i, k, 0, { texture: null, width: 32, height: 32, color: {
+				r: 255,
+				g: 255,
+				b: 255
+			}});
 			//map.setTile(i, 1, k, { texture:textures["Grass"], width: 32, height: 32 });
 		}
 	}
@@ -54,31 +59,36 @@ function draw() {
 	//camera.position.y = player.y;	
 	camera.on();
 	//camera(player.x, player.y, (height / 2) / tan(PI / 6), 0, 0, 0, 0, 1, 0);		
-	push()
-	stroke(0,0,0, 50)
-	translate(baseX+16, baseY+16)
-	for(var x = 0; x <= this.map.mapX; x++){
-		//line(-x*16, x*8, ((this.map.mapX/2)*32)-(x*16), ((this.map.mapY/2)*16)+(x*8));
-	}
-	for(var x = 0; x <= this.map.mapY; x++){
-		//line(x*16, x*8, (-((this.map.mapX)/2)*32)+(x*16), (((this.map.mapY)/2)*16)+(x*8));
-	}	
-	pop()
-	for(var i = 0; i < map.points.length; ++i) {
-		var a = map.points[i];
-		if(a.d){
+	
+	map.points.forEach((a, i) => {
+		if(a.d && a.tile.texture != null){
 			//var baseX = 0;			
 			//var baseY = 0;		
 			//var x = baseX + ((a.x - a.z) * (32 / 2)) - (32 / 2);
 			//var y = baseY + (((a.x + a.z) * (32 / 4)) - ((32 / 2) * (a.y))) - (32/ 2);
 			var x = baseX + Math.round(((a.x - a.y) * (a.tile.texture.width / 2)))
 			var y = baseY + Math.round(((a.x + a.y) * (a.tile.texture.height / 4)))
-			if(x < windowWidth && y < windowHeight){
+			if(x > - 32 && x < windowWidth && y < windowHeight && y > -32){
+				if(a.tile.color.r != 255 && a.tile.color.g != 255 && a.tile.color.b != 255) 
+					tint(a.tile.color.r, a.tile.color.g, a.tile.color.b)
 				image(a.tile.texture, x, y, 32, 32)
 			}			
-			//text(x/16, x+11, y+4, 12);
+			//textAlign(CENTER);
+			//textSize(8);			
+			//text(i, x+16, y, 12);
 		}
+	})
+
+	push()
+	stroke(0,0,0, 50)
+	translate(baseX+16, baseY)
+	for(var x = 0; x <= this.map.mapX; x++){
+		line(-x*16, x*8, ((this.map.mapX/2)*32)-(x*16), ((this.map.mapY/2)*16)+(x*8));
 	}
+	for(var x = 0; x <= this.map.mapY; x++){
+		line(x*16, x*8, (-((this.map.mapX)/2)*32)+(x*16), (((this.map.mapY)/2)*16)+(x*8));
+	}	
+	pop()
 
 	var ba = [0, 1, 2, 3, 4, 5, 6]
 	
@@ -147,19 +157,36 @@ function draw() {
 	//text("Y: "+yC, mouseX+60, mouseY+10, 12);	
 
 	var a = this.map.points.find(a => a.x == xC && a.y == yC && a.z == 0);	
-	push()
+
 	var gX = Math.round(((xC - yC) * (32 / 2)))
 	var gY = Math.round(((xC + yC) * (32 / 4)))
 
-	translate(baseX + gX, (baseY + gY)+8)
-	line(16, -8, 0, 0);
-	line(16, 8, 0, 0);
-	line(32, 0, 16, -8);
-	line(32, 0, 16, 8);
-	pop()
-	if(a != null){		
-		if(mouseIsPressed){				
-			a.d = false;
+	if(xC >= 0 && xC < map.mapX && yC >= 0 && yC < map.mapY){
+		push()	
+		translate(baseX + gX, (baseY + gY)+8)
+		line(16, -8, 0, 0);
+		line(16, 8, 0, 0);
+		line(32, 0, 16, -8);
+		line(32, 0, 16, 8);
+		pop()
+	}
+	if(a && mouseIsPressed){				
+		if (mouseButton === LEFT && a.tile.texture) {
+			a.tile.texture = null;
+		}
+		if (mouseButton === RIGHT && !a.tile.texture) {
+			a.tile.texture = textures[["Grass", "Wool"][Math.round(Math.random() * 1)]]
+		}
+		if (mouseButton === CENTER && a.tile.texture) {
+			if(a.tile.texture == textures["Wool"]){
+				a.tile.color = {
+					r: Math.round(Math.random()*255),
+					g: Math.round(Math.random()*255),
+					b: Math.round(Math.random()*255)
+				}
+			}else{
+				a.tile.texture = textures[["Grass", "Stone", "Dirt"][Math.round(Math.random() * 2)]]
+			}			
 		}
 	}	
 }
