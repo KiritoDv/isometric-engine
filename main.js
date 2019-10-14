@@ -35,7 +35,12 @@ function setup() {
 
 	for (var i = 0; i < 70; i++) {
 		for (var k = 0; k < 70; k++) {
-			map.setTile(i, k, 0, { texture: null, width: 32, height: 32, color: {
+			map.setTile(i, k, 0, { texture: textures["Grass"], width: 32, height: 32, color: {
+				r: 255,
+				g: 255,
+				b: 255
+			}});
+			map.setTile(i, k, 1, { texture: null, width: 32, height: 32, color: {
 				r: 255,
 				g: 255,
 				b: 255
@@ -58,18 +63,7 @@ function draw() {
 	//camera.position.x = player.x;
 	//camera.position.y = player.y;	
 	camera.on();
-	//camera(player.x, player.y, (height / 2) / tan(PI / 6), 0, 0, 0, 0, 1, 0);		
-	
-	push()
-	stroke(0,0,0, 50)
-	translate(baseX+16, baseY)
-	for(var x = 0; x <= this.map.mapX; x++){
-		line(-x*16, x*8, ((this.map.mapX/2)*32)-(x*16), ((this.map.mapY/2)*16)+(x*8));
-	}
-	for(var x = 0; x <= this.map.mapY; x++){
-		line(x*16, x*8, (-((this.map.mapX)/2)*32)+(x*16), (((this.map.mapY)/2)*16)+(x*8));
-	}	
-	pop()
+	//camera(player.x, player.y, (height / 2) / tan(PI / 6), 0, 0, 0, 0, 1, 0);				
 
 	var mX = (mouseX - 16) - baseX
 	var mY = (mouseY - 8) - baseY
@@ -80,12 +74,40 @@ function draw() {
 	//text("X: "+xC, mouseX+20, mouseY+10, 12);
 	//text("Y: "+yC, mouseX+60, mouseY+10, 12);	
 
-	var a = this.map.points.find(a => a.x == xC && a.y == yC && a.z == 0);	
+	var a = this.map.points.find(a => a.x == xC && a.y == yC && a.z == 1);	
 
 	var gX = Math.round(((xC - yC) * (32 / 2)))
 	var gY = Math.round(((xC + yC) * (32 / 4)))	
 
 	strokeWeight(1);
+
+	map.points.forEach((a, i) => {
+		if(a.d && a.tile.texture != null && a.z == 0){
+			//var baseX = 0;			
+			//var baseY = 0;		
+			//var x = baseX + ((a.x - a.z) * (32 / 2)) - (32 / 2);
+			//var y = baseY + (((a.x + a.z) * (32 / 4)) - ((32 / 2) * (a.y))) - (32/ 2);
+			var x = baseX + Math.round(((a.x - a.y) * (a.tile.texture.width / 2)))
+			var y = baseY + Math.round((((a.x + a.y) * (a.tile.texture.height / 4))) - ((32 / 2) * (a.z)))
+			if(x > - 32 && x < windowWidth && y < windowHeight && y > -32){
+				image(a.tile.texture, x, y, 32, 32)
+			}			
+			//textAlign(CENTER);
+			//textSize(8);			
+			//text(i, x+16, y, 12);
+		}
+	})
+
+	push()
+	stroke(0,0,0, 50)
+	translate(baseX+16, baseY)
+	for(var x = 0; x <= this.map.mapX; x++){
+		line(-x*16, x*8, ((this.map.mapX/2)*32)-(x*16), ((this.map.mapY/2)*16)+(x*8));
+	}
+	for(var x = 0; x <= this.map.mapY; x++){
+		line(x*16, x*8, (-((this.map.mapX)/2)*32)+(x*16), (((this.map.mapY)/2)*16)+(x*8));
+	}	
+	pop()
 
 	if(xC >= 0 && xC < map.mapX && yC >= 0 && yC < map.mapY){
 		push()	
@@ -103,16 +125,28 @@ function draw() {
 		pop()
 	}
 
+	if(xC >= 0 && xC < map.mapX && yC >= 0 && yC < map.mapY){
+		push()	
+		translate(baseX + gX, (baseY + gY)+8)
+			
+		translate(0, -16)
+		line(16, -8, 0, 0);
+		line(16, 8, 0, 0);
+		line(32, 0, 16, -8);
+		line(32, 0, 16, 8);
+		
+		pop()
+	}
 
 	map.points.forEach((a, i) => {
-		if(a.d && a.tile.texture != null){
+		if(a.d && a.tile.texture != null && a.z > 0){
 			//var baseX = 0;			
 			//var baseY = 0;		
 			//var x = baseX + ((a.x - a.z) * (32 / 2)) - (32 / 2);
 			//var y = baseY + (((a.x + a.z) * (32 / 4)) - ((32 / 2) * (a.y))) - (32/ 2);
 			var x = baseX + Math.round(((a.x - a.y) * (a.tile.texture.width / 2)))
-			var y = baseY + Math.round((((a.x + a.y) * (a.tile.texture.height / 4)))-16)
-			if(x > - 32 && x < windowWidth && y < windowHeight && y > -32){				
+			var y = baseY + Math.round((((a.x + a.y) * (a.tile.texture.height / 4))) - ((32 / 2) * (a.z)))
+			if(x > - 32 && x < windowWidth && y < windowHeight && y > -32){
 				image(a.tile.texture, x, y, 32, 32)
 			}			
 			//textAlign(CENTER);
