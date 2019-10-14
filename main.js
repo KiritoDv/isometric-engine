@@ -68,9 +68,7 @@ function draw() {
 			//var y = baseY + (((a.x + a.z) * (32 / 4)) - ((32 / 2) * (a.y))) - (32/ 2);
 			var x = baseX + Math.round(((a.x - a.y) * (a.tile.texture.width / 2)))
 			var y = baseY + Math.round(((a.x + a.y) * (a.tile.texture.height / 4)))
-			if(x > - 32 && x < windowWidth && y < windowHeight && y > -32){
-				if(a.tile.color.r != 255 && a.tile.color.g != 255 && a.tile.color.b != 255) 
-					tint(a.tile.color.r, a.tile.color.g, a.tile.color.b)
+			if(x > - 32 && x < windowWidth && y < windowHeight && y > -32){				
 				image(a.tile.texture, x, y, 32, 32)
 			}			
 			//textAlign(CENTER);
@@ -184,6 +182,8 @@ function draw() {
 					g: Math.round(Math.random()*255),
 					b: Math.round(Math.random()*255)
 				}
+				//tint(a.tile.color.r, a.tile.color.g, a.tile.color.b)
+				//a.tile.texture = textures["Wool"];
 			}else{
 				a.tile.texture = textures[["Grass", "Stone", "Dirt"][Math.round(Math.random() * 2)]]
 			}			
