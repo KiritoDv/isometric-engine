@@ -33,14 +33,14 @@ function setup() {
 
 	picker = new IsometricPicker({x: 32, y: 32});	
 
-	for (var i = 0; i < 70; i++) {
-		for (var k = 0; k < 70; k++) {
-			map.setTile(i, k, 0, { texture: null, width: 32, height: 32, color: {
+	for (var i = 0; i < 20; i++) {
+		for (var k = 0; k < 20; k++) {
+			map.setTile(i, k, 0, { texture: textures["Stone"], width: 32, height: 32, color: {
 				r: 255,
 				g: 255,
 				b: 255
 			}});
-			//map.setTile(i, 1, k, { texture:textures["Grass"], width: 32, height: 32 });
+			map.setTile(i, k, 1, { texture:textures["Grass"], width: 32, height: 32 });
 		}
 	}
 }
@@ -60,26 +60,9 @@ function draw() {
 	camera.on();
 	//camera(player.x, player.y, (height / 2) / tan(PI / 6), 0, 0, 0, 0, 1, 0);		
 	
-	map.points.forEach((a, i) => {
-		if(a.d && a.tile.texture != null){
-			//var baseX = 0;			
-			//var baseY = 0;		
-			//var x = baseX + ((a.x - a.z) * (32 / 2)) - (32 / 2);
-			//var y = baseY + (((a.x + a.z) * (32 / 4)) - ((32 / 2) * (a.y))) - (32/ 2);
-			var x = baseX + Math.round(((a.x - a.y) * (a.tile.texture.width / 2)))
-			var y = baseY + Math.round(((a.x + a.y) * (a.tile.texture.height / 4)))
-			if(x > - 32 && x < windowWidth && y < windowHeight && y > -32){				
-				image(a.tile.texture, x, y, 32, 32)
-			}			
-			//textAlign(CENTER);
-			//textSize(8);			
-			//text(i, x+16, y, 12);
-		}
-	})
-
 	push()
 	stroke(0,0,0, 50)
-	translate(baseX+16, baseY)
+	translate(baseX+16, baseY+16)
 	for(var x = 0; x <= this.map.mapX; x++){
 		line(-x*16, x*8, ((this.map.mapX/2)*32)-(x*16), ((this.map.mapY/2)*16)+(x*8));
 	}
@@ -87,6 +70,23 @@ function draw() {
 		line(x*16, x*8, (-((this.map.mapX)/2)*32)+(x*16), (((this.map.mapY)/2)*16)+(x*8));
 	}	
 	pop()
+
+	map.points.forEach((a, i) => {
+		if(a.d && a.tile.texture != null){
+			//var baseX = 0;			
+			//var baseY = 0;		
+			//var x = baseX + ((a.x - a.z) * (32 / 2)) - (32 / 2);
+			//var y = baseY + (((a.x + a.z) * (32 / 4)) - ((32 / 2) * (a.y))) - (32/ 2);
+			var x = baseX + Math.round(((a.x - a.y) * (a.tile.texture.width / 2)))
+			var y = baseY + Math.round((((a.x + a.y) * (a.tile.texture.height / 4))) - ((32 / 2) * (a.z)))
+			if(x > - 32 && x < windowWidth && y < windowHeight && y > -32){				
+				image(a.tile.texture, x, y, 32, 32)
+			}			
+			//textAlign(CENTER);
+			//textSize(8);			
+			//text(i, x+16, y, 12);
+		}
+	})	
 
 	var ba = [0, 1, 2, 3, 4, 5, 6]
 	
@@ -156,43 +156,48 @@ function draw() {
 	var yC = Math.round(((mY / (32 / 4) - (mX / (32 / 2))) / 2));
 
 	//text("X: "+xC, mouseX+20, mouseY+10, 12);
-	//text("Y: "+yC, mouseX+60, mouseY+10, 12);	
+	//text("Y: "+yC, mouseX+60, mouseY+10, 12);		
 
-	var a = this.map.points.find(a => a.x == xC && a.y == yC && a.z == 0);	
+	var tmp = this.map.points.filter(a => a.x == xC && a.y == yC  && a.tile.texture);
 
-	var gX = Math.round(((xC - yC) * (32 / 2)))
-	var gY = Math.round(((xC + yC) * (32 / 4)))
+	if(tmp.length > 0){
+		var a = _.maxBy(tmp, 'z');		
+		var gX = Math.round(((xC - yC) * (32 / 2)))
+		var gY = Math.round((((xC + yC) * (32 / 4))))
 
-	if(xC >= 0 && xC < map.mapX && yC >= 0 && yC < map.mapY){
-		push()	
-		translate(baseX + gX, (baseY + gY)+8)
-		line(16, -8, 0, 0);
-		line(16, 8, 0, 0);
-		line(32, 0, 16, -8);
-		line(32, 0, 16, 8);
-		pop()
+		if(xC >= 0 && xC < map.mapX && yC >= 0 && yC < map.mapY){
+			push()	
+			translate(baseX + gX, (baseY + gY)+8)
+			line(16, -8, 0, 0);
+			line(16, 8, 0, 0);
+			line(32, 0, 16, -8);
+			line(32, 0, 16, 8);
+			pop()
+		}
+		if(a && mouseIsPressed){				
+			if (mouseButton === LEFT && a.tile.texture) {
+				a.tile.texture = null;
+			}
+			if (mouseButton === RIGHT && !a.tile.texture) {
+				a.tile.texture = textures[["Grass", "Wool"][Math.round(Math.random() * 1)]]
+			}
+			if (mouseButton === CENTER && a.tile.texture) {
+				if(a.tile.texture == textures["Wool"]){
+					a.tile.color = {
+						r: Math.round(Math.random()*255),
+						g: Math.round(Math.random()*255),
+						b: Math.round(Math.random()*255)
+					}
+					//tint(a.tile.color.r, a.tile.color.g, a.tile.color.b)
+					//a.tile.texture = textures["Wool"];
+				}else{
+					a.tile.texture = textures[["Grass", "Stone", "Dirt"][Math.round(Math.random() * 2)]]
+				}			
+			}
+		}
 	}
-	if(a && mouseIsPressed){				
-		if (mouseButton === LEFT && a.tile.texture) {
-			a.tile.texture = null;
-		}
-		if (mouseButton === RIGHT && !a.tile.texture) {
-			a.tile.texture = textures[["Grass", "Wool"][Math.round(Math.random() * 1)]]
-		}
-		if (mouseButton === CENTER && a.tile.texture) {
-			if(a.tile.texture == textures["Wool"]){
-				a.tile.color = {
-					r: Math.round(Math.random()*255),
-					g: Math.round(Math.random()*255),
-					b: Math.round(Math.random()*255)
-				}
-				//tint(a.tile.color.r, a.tile.color.g, a.tile.color.b)
-				//a.tile.texture = textures["Wool"];
-			}else{
-				a.tile.texture = textures[["Grass", "Stone", "Dirt"][Math.round(Math.random() * 2)]]
-			}			
-		}
-	}	
+
+	//var a = this.map.points.find(a => a.x == xC && a.y == yC);	
 }
 
 function getMaxOfArray(numArray) {
