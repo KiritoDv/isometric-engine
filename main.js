@@ -124,6 +124,10 @@ function draw() {
 
 	let fps = frameRate();	
 	text("FPS: " + fps.toFixed(2), 20, 20);
+	text("- Controls -", 20, 38);
+	text("[ WASD ] - Camera Movement", 20, 55);
+	text("[ Left Click ] - Break Block", 20, 70);
+	text("[ Right Click ] - Place Block", 20, 85);
 
 	//var xC = (camera.mouseX / 16 + camera.mouseX / 16) / 2;
 	//var yC = ((camera.mouseY*8) / 32 - (camera.mouseX / 8)) /2;
@@ -205,6 +209,6 @@ function mouseDragged(){
 	
 }
 
-window.onresize = function () {
+function windowResized() {
 	resizeCanvas(windowWidth, windowHeight);
-};
+}
