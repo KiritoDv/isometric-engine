@@ -22,9 +22,11 @@ function preload() {
 }
 
 p5.disableFriendlyErrors = true; 
-
+var currentSlot = 0;
+var slots;
 let cameraLocation;
 function setup() {
+	slots = [textures["Grass"], textures["Dirt"], textures["Stone"], textures["Wool"], textures["SmallStone"]];
 	const canvasElt = createCanvas(windowWidth, windowHeight).elt;
 	canvasElt.style.width = '100%', canvasElt.style.height = '100%';
 	cameraLocation = createVector(0, 0, (height/2.0) / tan(PI*30.0 / 180.0));	
@@ -224,7 +226,7 @@ function draw() {
 			a.tile.texture = null;
 		}
 		if (mouseButton === RIGHT && !a.tile.texture) {
-			a.tile.texture = textures[["Grass", "Wool"][Math.round(Math.random() * 1)]]
+			a.tile.texture = slots[currentSlot]
 		}
 		if (mouseButton === CENTER && a.tile.texture) {
 			if(a.tile.texture == textures["Wool"]){
@@ -240,8 +242,37 @@ function draw() {
 			}			
 		}
 	}	
+	drawGui()
 }
 
+function drawGui(){
+	
+	push()	
+	slots.forEach((s, i) => {
+		var sc = currentSlot == i ? 110 : 90; 
+		var fc = currentSlot == i ? 170 : 120;
+		var x = ((windowWidth/2) - 125) + i * 50;
+		var y = windowHeight - 80;
+		stroke(sc, sc, sc, 200)
+		fill(fc, fc, fc, 200)
+		strokeWeight(4)		
+		rect(x, y, 50, 50, 10)
+		if(s){
+			push()
+			image(s, x+5, y+5, 40, 40)
+			pop()
+		}
+	})	
+	pop()
+}
+function keyTyped() {	
+	
+	var reg = new RegExp('^[0-9]+$');
+
+	if(reg.test(key) && slots.length+1 > key){
+		currentSlot = key-1;
+	}
+}
 function getMaxOfArray(numArray) {
 	return Math.max.apply(null, numArray);
 }
