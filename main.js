@@ -83,17 +83,26 @@ function draw() {
 	var a = this.map.points.find(a => a.x == xC && a.y == yC && a.z == 0);	
 
 	var gX = Math.round(((xC - yC) * (32 / 2)))
-	var gY = Math.round(((xC + yC) * (32 / 4)))
+	var gY = Math.round(((xC + yC) * (32 / 4)))	
+
+	strokeWeight(1);
 
 	if(xC >= 0 && xC < map.mapX && yC >= 0 && yC < map.mapY){
 		push()	
-		translate(baseX + gX, (baseY + gY)+8)
+		translate(baseX + gX, (baseY + gY)+9)
 		line(16, -8, 0, 0);
 		line(16, 8, 0, 0);
 		line(32, 0, 16, -8);
 		line(32, 0, 16, 8);
+						
+		line(0, -16, 0, 0)
+		line(32, -16, 32, 0)
+		line(16, -8, 16, 8)
+		line(16, -24, 16, -8)		
+		
 		pop()
 	}
+
 
 	map.points.forEach((a, i) => {
 		if(a.d && a.tile.texture != null){
@@ -112,6 +121,19 @@ function draw() {
 		}
 	})	
 
+	if(xC >= 0 && xC < map.mapX && yC >= 0 && yC < map.mapY){
+		push()	
+		translate(baseX + gX, (baseY + gY)+8)
+			
+		translate(0, -16)
+		line(16, -8, 0, 0);
+		line(16, 8, 0, 0);
+		line(32, 0, 16, -8);
+		line(32, 0, 16, 8);
+		
+		pop()
+	}
+	
 	var ba = [0, 1, 2, 3, 4, 5, 6]
 	
 
